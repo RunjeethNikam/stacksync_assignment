@@ -1,0 +1,253 @@
+/* Root layout */
+#root {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+}
+
+/* Main container */
+.app-container {
+  height: 100vh;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top bar */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #1e1e1e;
+  color: #fff;
+  padding: 8px 12px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.url-area {
+  flex: 1;
+  margin: 0 16px;
+  cursor: pointer;
+  color: #bbb;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.url-input {
+  width: 100%;
+  padding: 4px;
+  font-size: 14px;
+  background-color: #2a2a2a;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 4px;
+}
+
+/* Run button and tooltip */
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.run-button {
+  background: #61dafb;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease-in-out;
+}
+
+.run-button:hover {
+  background: #4ec7e8;
+}
+
+.play-icon {
+  margin-right: 6px;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+}
+
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Split layout */
+.split-horizontal {
+  height: calc(100% - 40px);
+  display: flex;
+  flex-direction: row;
+}
+
+/* Editor */
+.editor-pane {
+  background: #1e1e1e;
+  padding: 12px;
+  height: 100%;
+  overflow: auto;
+}
+
+/* Output */
+.output-pane {
+  background-color: #1e1e1e;
+  color: #dcdcdc;
+  padding: 12px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.output-pane h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.output-section {
+  margin-bottom: 16px;
+}
+
+.output-pane pre {
+  background: #1e1e1e;
+  color: #dcdcdc;
+  padding: 8px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.output-loading {
+  color: #999;
+}
+
+.output-error {
+  color: #ff6b6b;
+  font-weight: bold;
+}
+
+.url-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #bbb;
+  font-size: 14px;
+}
+
+.pencil-icon {
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.url-area:hover .pencil-icon {
+  opacity: 1;
+}
+
+/* Add a small gray keyboard hint in Run button */
+.shortcut-hint {
+  font-size: 12px;
+  margin-left: 8px;
+  color: #333;
+  background: #fff;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: monospace;
+  user-select: none;
+}
+
+
+/* Split gutter styling for horizontal drag */
+.split-horizontal > .gutter {
+  background-color: #333;
+  cursor: col-resize;
+  width: 6px;
+}
+
+/* Make sure editor and output take full height */
+.editor-pane,
+.output-pane {
+  height: 100%;
+  overflow: auto;
+  padding: 12px;
+}
+
+/* Fix run button colors for dark theme */
+.run-button {
+  background: #3ea2cc;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease-in-out;
+}
+
+.run-button:hover {
+  background: #3293bd;
+}
+
+.shortcut-hint {
+  font-size: 12px;
+  margin-left: 8px;
+  color: #eee;
+  background: #222;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: monospace;
+  user-select: none;
+}
+
+.output-error {
+  color: #ff6b6b;
+  font-weight: bold;
+  margin-top: 16px;
+}
+
+.error-details {
+  color: #ff9f9f;
+  font-weight: normal;
+  margin-top: 8px;
+}
+
+.error-trace {
+  color: #ffaa88;
+  margin-top: 8px;
+  font-size: 13px;
+  white-space: pre-wrap;
+  background-color: #2e2e2e;
+  padding: 8px;
+  border-radius: 4px;
+}

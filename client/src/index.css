@@ -1,0 +1,261 @@
+/* Reset & Base */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+/* Light/Dark Mode */
+body.dark {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+body.light {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* App layout */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ide-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Split Layout */
+.split-vertical {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.split-vertical > div {
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+}
+
+.split-vertical .gutter {
+  background-color: #444;
+  height: 8px;
+  cursor: row-resize;
+  flex-shrink: 0;
+}
+
+/* Tab Bar (VS Code style) */
+.tab-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background-color: #1e1e1e;
+  color: white;
+  border-bottom: 1px solid #333;
+}
+
+body.light .tab-bar {
+  background-color: #f3f3f3;
+  color: #000;
+  border-bottom: 1px solid #ccc;
+}
+
+.tab-bar.bottom-tab {
+  border-top: 1px solid #333;
+  border-bottom: none;
+}
+
+body.light .tab-bar.bottom-tab {
+  border-top: 1px solid #ccc;
+}
+
+.tab-label {
+  padding: 0 4px;
+}
+
+/* Theme toggle + Run icons */
+.tab-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.icon-button:hover {
+  opacity: 0.7;
+}
+
+/* Editor + Output Panes */
+.editor-pane,
+.output-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+/* Remove padding in top pane */
+.code-only {
+  padding: 0 !important;
+}
+
+body.dark .editor-pane {
+  background-color: #2e2e2e;
+}
+
+body.light .editor-pane {
+  background-color: #ffffff;
+}
+
+.output-pane-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+body.dark .output-pane {
+  background-color: #1b1b1b;
+  color: #00ff90;
+  border-left: 2px solid #444;
+}
+
+body.light .output-pane {
+  background-color: #f9f9f9;
+  color: #222;
+  border-left: 2px solid #ccc;
+}
+
+/* Output formatting */
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+/* Fully flatten CodeMirror layout */
+.cm-editor, 
+.cm-editor * {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  box-sizing: border-box !important;
+}
+
+.cm-editor {
+  height: 100% !important;
+  width: 100% !important;
+  background-color: transparent !important;
+}
+
+.cm-scroller {
+  height: 100% !important;
+  overflow: auto !important;
+}
+
+.cm-content {
+  min-height: 100% !important;
+}
+
+.cm-lineNumbers {
+  padding-left: 4px !important;
+}
+
+
+/* CodeMirror Light Mode Overrides */
+body.light .cm-editor {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+body.light .cm-content,
+body.light .cm-line,
+body.light .cm-line span {
+  color: #000000 !important;
+}
+
+body.light .cm-keyword {
+  color: #0000cc !important;
+}
+
+body.light .cm-string {
+  color: #a31515 !important;
+}
+
+body.light .cm-variableName {
+  color: #000000 !important;
+}
+
+body.light .cm-comment {
+  color: #008000 !important;
+  font-style: italic;
+}
+
+body.light .cm-gutters {
+  background-color: #f0f0f0 !important;
+  color: #000 !important;
+  border-right: 1px solid #ccc;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .main {
+    flex-direction: column;
+  }
+
+  .editor-pane,
+  .output-pane {
+    height: 50%;
+    flex: unset;
+  }
+
+  .output-pane {
+    border-left: none;
+    border-top: 2px solid #444;
+  }
+
+  body.light .output-pane {
+    border-top: 2px solid #ccc;
+  }
+}
+
+.url-input {
+  font-size: 0.9rem;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font-family: inherit;
+  width: 100%;
+}
+
+/* Make the blinking cursor more visible */
+.cm-cursor {
+  border-left: 2px solid #ffffff !important; /* white cursor */
+}
+
+/* Optional: light theme cursor override */
+body.light .cm-cursor {
+  border-left: 2px solid #000000 !important; /* black cursor */
+}
