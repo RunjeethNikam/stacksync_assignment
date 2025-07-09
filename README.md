@@ -1,32 +1,30 @@
-# Python Script Execution API
+# Python Sandbox API
 
-This project provides a secure API service that allows users to execute arbitrary Python scripts by submitting them via an HTTP POST request. The script must define a `main()` function that returns a JSON-compatible Python object.
+A secure and efficient API that executes user-submitted Python scripts inside a tightly controlled environment. The code is expected to define a main() function which returns a JSON-serializable response.
 
-## ✨ Features
+## ✨ Highlights
 
-- ✅ Execute arbitrary Python scripts in a controlled sandbox
-- ✅ Flask-based HTTP API with `/execute` endpoint
-- ✅ Output includes both return value and captured `stdout`
-- ✅ Lightweight local runtime (437MB)
-- ✅ Hardened Cloud Run deployment (735MB)
-- ✅ Uses **NsJail** for isolation with custom seccomp filters and chroot
-- ✅ Supports `os`, `pandas`, and `numpy`
-- ✅ Includes separate configurations for local and cloud environments
-
+🔒 Isolated Python execution using NsJail sandbox
+🔄 Flask API with a single /execute endpoint
+📤 Captures stdout and return values as part of output
+🐳 Optimized Docker setup for local and cloud use
+🛡️ Cloud-safe build with chroot and seccomp hardening
+🧰 Supports numpy, pandas, and standard Python modules
+🌐 Includes basic web IDE built in React (optional)
 ---
 
-## 🚀 How to Run Locally
+## 🚀 Local Development
 
-Build and run the Docker container with local sandboxing:
+To run the API locally using Docker:
 
 ```bash
-docker build -t python-api --build-arg BUILD=local .
-docker run -p 8080:8080 python-api
+docker build -t python-sandbox-api --build-arg BUILD=local .
+docker run -p 8080:8080 python-sandbox-api
 ```
 
-## ☁️ Cloud Run Deployment
+## ☁️ Running in Google Cloud Run
 
-This project includes a **Cloud Run-compatible version** of NsJail using a custom patch to bypass gVisor restrictions (e.g., `PR_SET_SECUREBITS`).
+This project is also compatible with Cloud Run and accounts for gVisor’s syscall restrictions.
 
 ### Build with:
 
@@ -34,66 +32,26 @@ This project includes a **Cloud Run-compatible version** of NsJail using a custo
 docker build -t python-api --build-arg BUILD=cloud .
 ```
 
-### Why Two Builds?
+### Notes on Cloud Compatibility
 
-#### The gVisor Reality
+Cloud Run uses gVisor under the hood, which blocks certain system operations:
 
-Google Cloud Run uses gVisor as its container runtime sandbox, which has specific restrictions on system calls. Contrary to common assumptions, gVisor does not block chroot operations. Instead, it restricts more powerful namespace operations:
+❌ clone(CLONE_NEWUSER), CLONE_NEWPID, etc. → Not allowed
 
-- ❌ clone(CLONE_NEWUSER) - Blocked (user namespace creation)
-- ❌ clone(CLONE_NEWNET) - Blocked (network namespace creation)
-- ❌ clone(CLONE_NEWPID) - Blocked (PID namespace creation)
-- ✅ chroot() - Allowed (filesystem root change)
+✅ chroot() → Permitted and used for filesystem sandboxing
 
-#### Why chroot Was Chosen
+Instead of relying on namespace-based isolation, this implementation switches to chroot mode with a pre-bundled Python runtime and minimal libraries.
 
-Since gVisor blocks the more robust namespace isolation mechanisms that tools like NsJail typically rely on, chroot became the viable sandboxing approach:
+### Sandbox Design
+Precompiled Python 3.11 binary and core libraries
 
- Traditional Approach (Blocked on Cloud Run)
+Controlled /tmp execution directory
 
-```bash
-nsjail --user_ns --net_ns --pid_ns --chroot /sandbox
-```
+Read-only mounts and environment whitelisting
 
-Cloud Run Compatible Approach
+Seccomp filtering to block risky operations
 
-```bash
-chroot /sandbox /usr/bin/python3 script.py
-```
-
-#### Implementation Details
-
-NsJail Modifications
-
-- 🛠️ Patched NsJail to disable securebits checks that prevent chroot in restricted environments
-- 📦 Simplified sandboxing strategy to work within gVisor's constraints
-
-Bundled Runtime Environment
-
-- 🐍 Full Python 3.11 runtime included in /sandbox
-- 📚 Minimal shared libraries for isolated execution
-- 🔒 Read-only filesystem for additional security
-
-Image Size Impact
-
-- 🏠 Local image: ~437MB (relies on host system libraries)
-- ☁️ Cloud image: ~735MB (includes complete isolated runtime)
-
-Security Benefits
-Even with the simpler chroot approach, the sandboxing provides:
-
-- Filesystem isolation - Code cannot access files outside /sandbox
-- Library isolation - Uses only bundled, controlled dependencies
-- Read-only environment - Prevents filesystem modifications
-- gVisor additional protection - Hardware-level isolation from Cloud Run
-
-#### Summary (TLDR)
-
-The choice of chroot over user namespaces wasn't a limitation—it was an adaptation to gVisor's security model. By understanding what gVisor actually blocks (namespace creation, not chroot), I created a Cloud Run-compatible sandboxing solution that maintains security while working within the platform's constraints.
-
-### Seccomp Profile
-
-For the **cloud variant**, the following system calls are explicitly blocked using a restrictive seccomp policy:
+### Seccomp Profile(Cloud Only)
 
 ```text
 KILL {
@@ -106,27 +64,33 @@ KILL {
 } DEFAULT ALLOW
 ```
 
-This ensures:
-
-- 🚫 **No permission changes** (`chmod`, `chown`, etc.)
-- 🔐 **No UID/GID escalation** (`setuid`, `setgid`, etc.)
-- 🧱 **No mounting or unmounting** of filesystems
+This policy ensures no privilege escalation or filesystem tampering.
 
 
+## Input Handling & Safety
 
-## ✅ Input Validation & Security
+Scripts are required to contain a main() function
 
-- Basic input validation ensures the script is a string and defines a `main()` function that returns JSON.
-- All script executions are sandboxed using **NsJail**, making the system robust against malicious or unsafe code.
+All code is wrapped in a controlled executor before running
 
-## 💻 React Client (Optional UI)
+Output includes:
+1. result: return value from main()
+2. stdout: printed output
+3. error and trace: if execution fails
 
-To demonstrate frontend integration and highlight my React skills, I’ve also built a simple **React-based IDE-style client** that lets users:
 
-- Edit and run Python code in a browser
-- Toggle between light/dark themes
-- Configure the Cloud Run endpoint dynamically
-- View structured JSON output from the API
+
+## Optional: Web IDE Client
+
+A frontend playground is also available to test the API in-browser. Built with:
+
+React + Vite
+
+CodeMirror for code editing
+
+Lucide icons
+
+Axios for backend integration
 
 This provides a convenient way to test the `/execute` endpoint interactively.
 
@@ -139,57 +103,46 @@ cd client
 npm install
 npm run dev
 ```
-Then open http://localhost:5173 in your browser.
-
-![image](https://github.com/user-attachments/assets/d4a2fab4-de12-467d-aac7-8b230bfdfe92)
+Visit http://localhost:5173 in your browser.
 
 
-## 📎 Example cURL Requests
+## Sample API Usage (cURL)
 
-You can quickly test the API using the following commands:
-
-#### ▶️ Basic Script
+#### Basic Script
 
 ```bash
-curl -X POST https://python-api-378367989398.us-central1.run.app/execute \
+curl -X POST https://<your-api>/execute \
   -H "Content-Type: application/json" \
-  -d '{
-    "script": "def main():\n    print(\"Hello from IDE\")\n    return {\"status\": \"ok\"}"
-  }'
+  -d '{"script": "def main():\n    print(\"Hi!\")\n    return {\"done\": True}"}'
 ```
 #### 🧮 NumPy Example
 
 ```bash
-curl -X POST https://python-api-378367989398.us-central1.run.app/execute \
+curl -X POST https://<your-api>/execute \
   -H "Content-Type: application/json" \
-  -d '{
-    "script": "def main():\n    import numpy as np\n    arr = np.array([1, 2, 3, 4, 5])\n    return {\"mean\": float(np.mean(arr))}"
-  }'
+  -d '{"script": "def main():\n    import numpy as np\n    return {\"avg\": float(np.mean([1,2,3]))}"}'
 ```
-#### 🚫 `os.mkdir()` Example (Expected to Fail)
+#### Error
 
 ```bash
-curl -X POST https://python-api-378367989398.us-central1.run.app/execute \
+curl -X POST https://<your-api>/execute \
   -H "Content-Type: application/json" \
-  -d '{
-    "script": "def main():\n    import os\n    os.mkdir(\"/should_fail\")\n    return {\"status\": \"created\"}"
-  }'
+  -d '{"script": "def main():\n    import os\n    os.mkdir(\"/root\")\n    return {}"}'
+
 ```
 
 ## ⏱️ Time Spent
 
-As a benchmark, this take-home challenge took approximately **7–8 hours** to complete, including:
+This project was built over the course of 15–20 focused hours, covering:
 
-- Docker image creation and optimization for both local and Cloud Run environments  
-- Custom patching of NsJail for Cloud Run compatibility (gVisor workaround)  
-- Setting up secure Python sandboxing with `chroot` and `seccomp`  
-- Building the Flask API with input validation and robust error handling  
-- Creating a React-based frontend to test and demonstrate the API interactively  
-- Writing documentation and testing edge cases for safety
+* 🔧 Designing and optimizing Docker builds for both local and cloud execution
+* 🛠️ Adapting NsJail to function seamlessly in Cloud Run by accounting for gVisor limitations
 
+* 🔒 Implementing secure Python sandboxing using chroot and restrictive seccomp rules
 
-## 🙏 Final Note
+* 🧪 Developing a robust Flask API with layered validation and structured error reporting
 
-Thank you for reviewing my submission. I’ve put genuine effort into building a secure, functional, and user-friendly solution that reflects both backend and frontend development skills.
+* 💻 Crafting a React-based IDE to test and visualize script execution in real-time
 
-I’m excited about the opportunity to contribute, learn, and grow — and I truly hope for a positive response and a chance to prove my capabilities as part of your team.
+* 🧾 Writing clear documentation and validating against various edge-case scenarios
+
