@@ -16,7 +16,8 @@ export default function App() {
   const [code, setCode] = useState(DEFAULT_CODE);
   const [output, setOutput] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [url, setUrl] = useState("https://python-api-378367989398.us-central1.run.app");
+  const defaultApiUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8080";
+  const [url, setUrl] = useState(defaultApiUrl);
   const [editingUrl, setEditingUrl] = useState(false);
 
   const handleRun = useCallback(async () => {
@@ -78,7 +79,7 @@ export default function App() {
         direction="horizontal"
         sizes={[60, 40]}
         minSize={200}
-        gutterSize={6}  // make sure this is defined!
+        gutterSize={6}
       >
 
         <div className="editor-pane">
