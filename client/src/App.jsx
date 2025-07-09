@@ -7,72 +7,71 @@ import axios from 'axios';
 import { Pencil, Play } from 'lucide-react';
 import './App.css';
 
-const DEFAULT_CODE = `def main():
-    print("Hello from IDE")
-    return {"status": "ok"}
+const INITIAL_CODE = `def main():
+    message = "Python execution successful!"
+    print(message)
+    return {"message": message}
 `;
 
 export default function App() {
-  const [code, setCode] = useState(DEFAULT_CODE);
-  const [output, setOutput] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const defaultApiUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8080";
-  const [url, setUrl] = useState(defaultApiUrl);
-  const [editingUrl, setEditingUrl] = useState(false);
+  const [script, setScript] = useState(INITIAL_CODE);
+  const [response, setResponse] = useState(null);
+  const [isRunning, setIsRunning] = useState(false);
+  const apiEndpoint = import.meta.env.VITE_API_URL || "http://127.0.0.1:8080";
+  const [endpoint, setEndpoint] = useState(apiEndpoint);
+  const [isEditing, setIsEditing] = useState(false);
 
-  const handleRun = useCallback(async () => {
-    setLoading(true);
-    setOutput(null);
+  const runScript = useCallback(async () => {
+    setIsRunning(true);
+    setResponse(null);
     try {
-      const res = await axios.post(`${url}/execute`, { script: code });
-      setOutput(res.data);
+      const result = await axios.post(`${endpoint}/execute`, { script });
+      setResponse(result.data);
     } catch (err) {
-      setOutput(err.response?.data || { error: 'Unknown error' });
+      setResponse(err.response?.data || { error: 'Unknown error occurred' });
     }
-    setLoading(false);
-  }, [code, url]);
+    setIsRunning(false);
+  }, [script, endpoint]);
 
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const triggerRun = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        handleRun();
+        runScript();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleRun]);
+    window.addEventListener('keydown', triggerRun);
+    return () => window.removeEventListener('keydown', triggerRun);
+  }, [runScript]);
 
   return (
     <div className="app-container">
-      <div className="top-bar">
-        <div className="title">Python IDE</div>
+      <header className="top-bar">
+        <h1 className="title">Python IDE</h1>
 
-        <div className="url-area" onClick={() => setEditingUrl(true)}>
-          {editingUrl ? (
+        <div className="url-area" onClick={() => setIsEditing(true)}>
+          {isEditing ? (
             <input
               autoFocus
               className="url-input"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && setEditingUrl(false)}
-              onBlur={() => setEditingUrl(false)}
+              value={endpoint}
+              onChange={(e) => setEndpoint(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && setIsEditing(false)}
+              onBlur={() => setIsEditing(false)}
             />
           ) : (
             <div className="url-display">
-              {url}
+              {endpoint}
               <Pencil size={14} className="pencil-icon" />
             </div>
           )}
         </div>
 
-
-        <button className="run-button" onClick={handleRun}>
-          <Play size={16} className="play-icon" /> Run <span className="shortcut-hint">Ctrl+⏎</span>
+        <button className="run-button" onClick={runScript}>
+          <Play size={16} className="play-icon" /> Run
+          <span className="shortcut-hint">Ctrl+⏎</span>
         </button>
-
-
-      </div>
+      </header>
 
       <Split
         className="split-horizontal"
@@ -81,54 +80,53 @@ export default function App() {
         minSize={200}
         gutterSize={6}
       >
-
-        <div className="editor-pane">
+        <section className="editor-pane">
           <CodeMirror
-            value={code}
+            value={script}
             height="100%"
             theme={oneDark}
             extensions={[python()]}
-            onChange={setCode}
+            onChange={setScript}
           />
-        </div>
+        </section>
 
-        <div className="output-pane">
+        <section className="output-pane">
           <h3>Output</h3>
-          {loading && <div className="output-loading">Running script...</div>}
-          {!loading && output && (
+          {isRunning && <div className="output-loading">Running script...</div>}
+
+          {!isRunning && response && (
             <>
-              {"result" in output && (
+              {'result' in response && (
                 <div className="output-section">
                   <strong>Result:</strong>
-                  <pre>{JSON.stringify(output.result, null, 2)}</pre>
+                  <pre>{JSON.stringify(response.result, null, 2)}</pre>
                 </div>
               )}
-              {"stdout" in output && (
+              {'stdout' in response && (
                 <div className="output-section">
                   <strong>Stdout:</strong>
-                  <pre>{output.stdout}</pre>
+                  <pre>{response.stdout}</pre>
                 </div>
               )}
-              {"error" in output && (
+              {'error' in response && (
                 <div className="output-error">
-                  <strong>Error:</strong> {output.error}
-                  {output.details && (
+                  <strong>Error:</strong> {response.error}
+                  {response.details && (
                     <div className="error-details">
-                      <strong>Details:</strong> {output.details}
+                      <strong>Details:</strong> {response.details}
                     </div>
                   )}
-                  {output.trace && (
+                  {response.trace && (
                     <div className="error-trace">
                       <strong>Traceback:</strong>
-                      <pre>{output.trace}</pre>
+                      <pre>{response.trace}</pre>
                     </div>
                   )}
                 </div>
               )}
-
             </>
           )}
-        </div>
+        </section>
       </Split>
     </div>
   );
