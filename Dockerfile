@@ -7,10 +7,8 @@ FROM debian:bookworm-slim AS builder
 ARG BUILD
 ENV BUILD=${BUILD}
 
-RUN apt-get update && apt-get install -y \
-  git make gcc g++ flex bison pkg-config \
-  libprotobuf-dev protobuf-compiler libnl-route-3-dev \
-  ca-certificates
+RUN apt-get update && apt-get install -y git make gcc g++ flex bison pkg-config \
+  libprotobuf-dev protobuf-compiler libnl-route-3-dev ca-certificates
 
 WORKDIR /root
 RUN git clone https://github.com/google/nsjail.git

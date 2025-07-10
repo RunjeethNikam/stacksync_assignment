@@ -146,3 +146,6 @@ This project was built over the course of 15–20 focused hours, covering:
 
 * 🧾 Writing clear documentation and validating against various edge-case scenarios
 
+### Image Sizes
+Local Image: 301MB
+Production Image: 509MB
